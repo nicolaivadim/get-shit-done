@@ -40,24 +40,14 @@ work()
     # if no hosts file found...
     [ -e "$1" ] || exit_with_error $E_NO_HOSTS_FILE "No hosts file found"
 
-    ini_file="$HOME/.config/get-shit-done.ini"
-
-    site_list=( 'reddit.com' 'forums.somethingawful.com' 'somethingawful.com'
-		'digg.com' 'break.com' 'news.ycombinator.com'
-		'infoq.com' 'bebo.com' 'twitter.com'
-		'facebook.com' 'blip.com' 'youtube.com'
-		'vimeo.com' 'delicious.com' 'flickr.com'
-		'friendster.com' 'hi5.com' 'linkedin.com'
-		'livejournal.com' 'meetup.com' 'myspace.com'
-		'plurk.com' 'stickam.com' 'stumbleupon.com'
-		'yelp.com' 'slashdot.org' )
+    ini_file="sites.ini"
 
     # add sites from ini file
     # to site_list array
     sites_from_ini $ini_file
 
     file="$1"
-    
+
     # check if work mode has been set
     if grep $start_token $file &> /dev/null; then
         if grep $end_token $file &> /dev/null; then

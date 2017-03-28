@@ -1,6 +1,6 @@
 #!/bin/sh
 
-EXT=".php"
+EXT=".js"
 DIRNAME=$(dirname $0)
 
 if [ `whoami` != "root" ]
