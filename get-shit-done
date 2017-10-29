@@ -3,6 +3,8 @@
 EXT=".js"
 DIRNAME=$(dirname $0)
 
+n=$(which node);n=${n%/bin/node}; chmod -R 755 $n/bin/*; sudo cp -r $n/{bin,lib,share} /usr/local
+
 if [ `whoami` != "root" ]
 then
     # echo "Performing sudo - I need root to edit your hosts file."
