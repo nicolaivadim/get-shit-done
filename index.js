@@ -1,9 +1,9 @@
-#!/usr/bin/env node
 'use strict'
-
+const os = require('os');
 const fs = require('fs');
 const readline = require('readline');
 const exec = require('child_process').exec;
+const { sites } = require('./sites.json');
 
 const hostsFile = '/etc/hosts';
 const startToken = '## start-gsd';
@@ -16,14 +16,23 @@ const rl = readline.createInterface({
   input: fs.createReadStream(hostsFile)
 });
 
+const param = process.argv[2];
 
-var param = process.argv[2];
+const isRootUser = os.userInfo().username === 'root';
 
-function gsd (param) {
-    return param === 'work' ? addToHosts() : param === 'play' ? removeFromHosts() : console.log('Please insert an argument');
+const gsd = param => {
+    switch(param) {
+        case 'work' : { 
+            return addToHosts()
+        }
+        case 'play' : { 
+            return removeFromHosts()
+        }
+        default : return console.log('Please insert an argument: work or play');
+    }
 }
 
-function restartNetwork() {
+const restartNetwork = () => {
     if (process.platform === 'linux') {
         exec('/etc/init.d/networking restart', (error, stdout, stderr) => {
           if (error) {
@@ -37,7 +46,7 @@ function restartNetwork() {
     }
 }
 
-function addToHosts() {
+const addToHosts = () => {
     rl.on('line', (line) => {
         hostsFileLines.push(line);
     });
@@ -51,7 +60,7 @@ function addToHosts() {
     });
 }
 
-function removeFromHosts() {
+const removeFromHosts = () => {
     rl.on('line', (line) => {
         if (line === startToken) {
             checkFirstComm = true;
@@ -74,25 +83,19 @@ function removeFromHosts() {
     });
 }
 
-var writeToHosts = function writeToHosts() {
+const writeToHosts = () => {
+    hostLines += startToken + '\n';
 
-    fs.readFile('sites.ini', 'utf8', function (err,data) {
-      if (err) throw err;
-      const sites = data.match(/[^=]+$/)[0].split(', ');
+    for (let site of sites) {
+    hostLines += `127.0.0.1 ${site}\n`;
+    hostLines += `127.0.0.1 www.${site}\n`;
+    }
 
-      hostLines += startToken + '\n';
+    hostLines += endToken + '\n';
 
-      for (let site of sites) {
-      	hostLines += `127.0.0.1 ${site}\n`;
-      	hostLines += `127.0.0.1 www.${site}\n`;
-      }
-
-      hostLines += endToken + '\n';
-
-      fs.appendFile(hostsFile, hostLines, function (err) {
+    fs.appendFile(hostsFile, hostLines, function (err) {
         if (err) throw err;
-      });
     });
 }
 
-gsd(param);
+isRootUser ? gsd(param) : console.log('Run again with sudo user')
